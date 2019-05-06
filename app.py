@@ -5,15 +5,31 @@ import time
 from datetime import datetime, timedelta
 from pytz import timezone
 
+"""
+    V1  MongoDB Based Database API
+    V2  Google Firebase Based Database API
+"""
+
 import json, random, string
 import firebase_admin
 from firebase_admin import credentials
 from firebase_admin import db as fdb
 
-cred = credentials.Certificate('medicine-reminder-947cb-firebase-adminsdk-05dsp-aaed29d4a9.json')
+import os
+
+from os.path import join, dirname
+from dotenv import load_dotenv
+
+dotenv_path = join(dirname(__file__), '.env')
+load_dotenv(dotenv_path)
+
+firebase_key = os.environ.get('FIREBASE_KEY', None)
+database_url = os.environ.get('FIREBASE_DB_URL', None)
+
+cred = credentials.Certificate(json.loads(firebase_key))
 tz = timezone('Asia/Jakarta')
 app = firebase_admin.initialize_app(cred, {
-    'databaseURL': 'https://medicine-reminder-947cb.firebaseio.com/'
+    'databaseURL': database_url
 })
 
 client = MongoClient('localhost:27017')
@@ -37,6 +53,7 @@ def add_firebase_medicine():
         id = generate_meds_id()
         if key:
             post_data = {
+                'id': id,
                 'nama_obat': data['nama_obat'],
                 'jenis_obat': data['jenis_obat'],
                 'intensitas': data['intensitas'],
